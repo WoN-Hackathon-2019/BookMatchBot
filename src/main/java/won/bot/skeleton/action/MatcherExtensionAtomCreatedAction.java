@@ -43,6 +43,8 @@ public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
         //TODO: looking for
         //TODO: author
         //TODO: website/url?
+        //TODO: ISBN
+        //TODO: Description
         System.out.println(title);
         System.out.println(name);
         System.out.println(price);
