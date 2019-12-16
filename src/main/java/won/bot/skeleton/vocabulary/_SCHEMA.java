@@ -10,11 +10,11 @@ public class _SCHEMA {
     public _SCHEMA() {
     }
 
-    public static final Property COMPOUNDPRICESPECIFICATION;
+    public static final Property AUTHOR;
+    public static final Property ISBN;
 
     static {
-        COMPOUNDPRICESPECIFICATION = m.createProperty("http://schema.org/CompoundPriceSpecification");
-        //TERMS_OF_SERVICE = m.createProperty("http://schema.org/termsOfService");
-        //TEXT = new BaseDatatype("http://schema.org/Text");
+        AUTHOR = m.createProperty("http://schema.org/author");
+        ISBN = m.createProperty("http://schema.org/isbn");
     }
 }
