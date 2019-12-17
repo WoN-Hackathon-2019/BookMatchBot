@@ -18,6 +18,7 @@ import won.protocol.vocabulary.WONCON;
 import won.protocol.vocabulary.WONMATCH;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,6 +45,14 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         if (!this.isSeek()) {
             this.createSeeksNode(null);
 
+        }
+    }
+
+    public URI getUri() {
+        try {
+            return new URI(this.getAtomUri());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -235,10 +244,6 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
                 eventObjectAboutUris.add(URI.create(rdfEventObjectAbout.asResource().getURI()));
             }
         }
-    }
-
-    public URI getHeldBy() {
-        return null;
     }
 
     public Collection<URI> getHolds() {

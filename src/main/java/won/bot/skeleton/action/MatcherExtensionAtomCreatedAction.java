@@ -70,8 +70,8 @@ public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
                 .filter(w -> w.getAtomState() == AtomState.ACTIVE)
                 .map(otherBook -> {
                     if (myBook.matchesWith(otherBook) || otherBook.matchesWith(myBook)) {
-                        hint(otherBook, myBook, ctx);
                         hint(myBook, otherBook, ctx);
+                        hint(otherBook, myBook, ctx);
                         return true;
                     }
                     return false;
@@ -87,7 +87,14 @@ public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
                     .hintScore(1.0)
                     .build();
             wonMessage = WonMessageSignerVerifier.seal(wonMessage);
-            ctx.getWonMessageSender().sendMessage(wonMessage);
+            ctx.getMatcherProtocolAtomServiceClient()
+                    .hint(
+                            myBook.getUri(),
+                            otherBook.getUri(),
+                            1.0,
+                            new URI("http://localhost:8080/matcher"),
+                            null,
+                            wonMessage);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
