@@ -428,8 +428,8 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
             return false;
         }
 
-        String myTitle = this.getSomeTitleFromIsOrAll();
-        String otherTitle = otherBook.getSomeTitleFromIsOrAll();
+        String myTitle = this.getSomeTitleFromIsOrAll().toLowerCase();
+        String otherTitle = otherBook.getSomeTitleFromIsOrAll().toLowerCase();
 
         return myTitle.contains(otherTitle) || otherTitle.contains(myTitle);
     }
