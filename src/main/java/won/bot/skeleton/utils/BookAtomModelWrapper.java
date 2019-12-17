@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class BookAtomModelWrapper extends AtomModelWrapper {
 
@@ -41,10 +42,23 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         super(atomModel, sysInfoModel);
     }
 
+    public boolean isBookOffer() {
+        return this.getContentTypes()
+                .stream()
+                .map(URI::toString)
+                .anyMatch(u -> Objects.equals(u, "https://w3id.org/won/ext/demo#BookOffer"));
+    }
+
+    public boolean isBookSearch() {
+        return this.getContentTypes()
+                .stream()
+                .map(URI::toString)
+                .anyMatch(u -> Objects.equals(u, "https://w3id.org/won/ext/demo#BookSearch"));
+    }
+
     private void createSeeksNodeIfNonExist() {
         if (!this.isSeek()) {
             this.createSeeksNode(null);
-
         }
     }
 
@@ -256,7 +270,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
     }
 
     public Coordinate getAnyLocationCoordinate() {
-        if (this.isSeek()) {
+        if (this.isBookSearch()) {
             return this.getSeekLocationCoordinate();
         } else {
             return getLocationCoordinate();
@@ -308,7 +322,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
     }
 
     public String getAnyAuthorName() {
-        return (this.isSeek()) ? this.getSeeksAuthorName() : this.getAuthorName();
+        return (this.isBookSearch()) ? this.getSeeksAuthorName() : this.getAuthorName();
     }
 
     public String getSeeksAuthorName() {
@@ -341,7 +355,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
     }
 
     public Float getAnyPrice() {
-        if (this.isSeek()) {
+        if (this.isBookSearch()) {
             return this.getSeeksPrice();
         } else {
             return this.getPrice();
@@ -375,7 +389,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
     }
 
     public String getAnyLocalName() {
-        return (this.isSeek() ? this.getSeekLocalName() : this.getLocalName());
+        return (this.isBookSearch() ? this.getSeekLocalName() : this.getLocalName());
     }
 
     public String getSeekLocalName() {
@@ -406,16 +420,15 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
     }
 
     public boolean isBook() {
-        return this.getSomeTitleFromIsOrAll() != null
-                && (this.getAllTags().contains("book") || this.getSomeIsbn() != null);
+        return this.isBookOffer() || this.isBookSearch();
     }
 
     public boolean matchesWith(BookAtomModelWrapper otherBook) {
-        if (this.isSeek()) {
+        if (this.isBookSearch()) {
             return false;
         }
 
-        if (!otherBook.isSeek()) {
+        if (otherBook.isBookOffer()) {
             return false;
         }
 
