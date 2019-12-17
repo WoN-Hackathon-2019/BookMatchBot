@@ -1,10 +1,7 @@
 package won.bot.skeleton.utils;
 
 import org.apache.jena.query.Dataset;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.RDF;
 import won.bot.skeleton.vocabulary._SCHEMA;
@@ -19,7 +16,10 @@ import won.protocol.vocabulary.WONMATCH;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Objects;
 
 public class BookAtomModelWrapper extends AtomModelWrapper {
 
@@ -39,7 +39,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         super(atomModel, sysInfoModel);
     }
 
-    public void addBookOfferType(){
+    public void addBookOfferType() {
         Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
         atomNode.addProperty(RDF.type, ModelFactory.createDefaultModel().createProperty("https://w3id.org/won/ext/demo#BookOffer"));
 
@@ -48,7 +48,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         atomNode.addProperty(WONMATCH.seeks, seeksnode);
     }
 
-    public void addBookSearchType(){
+    public void addBookSearchType() {
         Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
         atomNode.addProperty(RDF.type, ModelFactory.createDefaultModel().createProperty("https://w3id.org/won/ext/demo#BookSearch"));
 
@@ -369,40 +369,6 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         return this.getSomeContentPropertyStringValue(_SCHEMA.ISBN, preferredLanguages);
     }
 
-    public Float getAnyPrice() {
-        if (this.isBookSearch()) {
-            return this.getSeeksPrice();
-        } else {
-            return this.getPrice();
-        }
-    }
-
-    public Float getSeeksPrice() {
-        for (Resource r : this.getSeeksNodes()) {
-            Float c = this.getPrice(r, SCHEMA.PRICESPECIFICATION);
-            if (c != null) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    public Float getPrice() {
-        return this.getPrice(this.getAtomContentNode(), SCHEMA.PRICESPECIFICATION);
-    }
-
-    private Float getPrice(Resource contentNode, Property priceProperty) {
-        Model atomModel = this.getAtomModel();
-        RDFNode priceCurrencyNode = RdfUtils.findOnePropertyFromResource(atomModel, contentNode, priceProperty);
-        RDFNode priceNode = priceCurrencyNode != null && priceCurrencyNode.isResource() ? RdfUtils.findOnePropertyFromResource(atomModel, priceCurrencyNode.asResource(), SCHEMA.PRICE) : null;
-
-        if (priceNode != null) {
-            return priceNode.asLiteral().getFloat();
-        } else {
-            return null;
-        }
-    }
-
     public String getAnyLocalName() {
         return (this.isBookSearch() ? this.getSeekLocalName() : this.getLocalName());
     }
@@ -496,13 +462,6 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         String otherTitle = otherBook.getSomeTitleFromIsOrAll().toLowerCase();
 
         return myTitle.contains(otherTitle) || otherTitle.contains(myTitle);
-    }
-
-
-    private void createSeeksNodeIfNonExist() {
-        if (!this.isSeek()) {
-            this.createSeeksNode(null);
-        }
     }
 
     public void setIsbn(String isbn) {

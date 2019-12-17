@@ -26,7 +26,6 @@ import java.util.HashMap;
 
 public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
 
-    private static final String CONNECTED_ATOMS = "connected-atoms";
     private static final String STORED_BOOK_OFFERS = "stored-book-offers";
     private static final String STORED_BOOK_SEARCHES = "stored-book-searches";
     private static final Logger logger = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -54,9 +53,7 @@ public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
 
         logger.info("Found atom {}, type: {}", wrapper.getSomeTitleFromIsOrAll(), wrapper.isBookSearch() ? "BookSearch" : "BookOffer");
 
-        botContext.addToListMap(wrapper.isBookSearch() ? STORED_BOOK_SEARCHES : STORED_BOOK_OFFERS, wrapper.getAtomUri(), wrapper.toStorableBook());
-
-        botContext.appendToNamedAtomUriList(atomCreatedEvent.getAtomURI(), CONNECTED_ATOMS);
+        botContext.saveToObjectMap(wrapper.isBookSearch() ? STORED_BOOK_SEARCHES : STORED_BOOK_OFFERS, wrapper.getAtomUri(), wrapper.toStorableBook());
     }
 
 
