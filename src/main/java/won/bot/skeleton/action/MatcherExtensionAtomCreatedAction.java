@@ -47,14 +47,12 @@ public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
 
         tryMatchWithAny(wrapper, botContext, ctx);
 
+        logger.info("Found atom {}, type: {}", wrapper.getSomeTitleFromIsOrAll(), wrapper.isBookSearch() ? "BookSearch" : "BookOffer");
         botContext.appendToNamedAtomUriList(atomCreatedEvent.getAtomURI(), CONNECTED_ATOMS);
     }
 
 
     private boolean tryMatchWithAny(BookAtomModelWrapper myBook, BotContext botContext, EventListenerContext ctx) {
-        boolean hint = false;
-
-
         List<BookAtomModelWrapper> wrappers = botContext.getNamedAtomUriList(CONNECTED_ATOMS)
                 .parallelStream()
                 .map(uri -> ctx.getLinkedDataSource().getDataForResource(uri))
@@ -70,6 +68,9 @@ public class MatcherExtensionAtomCreatedAction extends BaseEventBotAction {
                 .filter(w -> w.getAtomState() == AtomState.ACTIVE)
                 .map(otherBook -> {
                     if (myBook.matchesWith(otherBook) || otherBook.matchesWith(myBook)) {
+                        logger.info("Match {} with {}",
+                                myBook.getSomeTitleFromIsOrAll(),
+                                otherBook.getSomeTitleFromIsOrAll());
                         hint(myBook, otherBook, ctx);
                         hint(otherBook, myBook, ctx);
                         return true;
