@@ -43,6 +43,7 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
     private void createSeeksNodeIfNonExist() {
         if (!this.isSeek()) {
             this.createSeeksNode(null);
+
         }
     }
 
@@ -362,9 +363,74 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         RDFNode priceNode = priceCurrencyNode != null && priceCurrencyNode.isResource() ? RdfUtils.findOnePropertyFromResource(atomModel, priceCurrencyNode.asResource(), SCHEMA.PRICE) : null;
 
         if (priceNode != null) {
-            return Float.valueOf(priceNode.asLiteral().getString());
+            return priceNode.asLiteral().getFloat();
         } else {
             return null;
         }
+    }
+
+    public String getAnyLocalName() {
+        return (this.isSeek() ? this.getSeekLocalName() : this.getLocalName());
+    }
+
+    public String getSeekLocalName() {
+
+        for (Resource r : this.getSeeksNodes()) {
+            String localName = this.getLocalName(r);
+            if (localName != null) {
+                return localName;
+            }
+        }
+        return null;
+    }
+
+    public String getLocalName() {
+        return this.getLocalName(this.getAtomContentNode());
+    }
+
+    public String getLocalName(Resource contentNode) {
+        Model atomModel = this.getAtomModel();
+        RDFNode objectNode = RdfUtils.findOnePropertyFromResource(atomModel, contentNode, SCHEMA.OBJECT);
+        RDFNode aboutNode = objectNode != null && objectNode.isResource() ? RdfUtils.findOnePropertyFromResource(atomModel, objectNode.asResource(), SCHEMA.ABOUT) : null;
+
+        if (aboutNode != null) {
+            return aboutNode.asResource().getLocalName();
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isBook() {
+        return this.getSomeTitleFromIsOrAll() != null
+                && (this.getAllTags().contains("book") || this.getSomeIsbn() != null);
+    }
+
+    public boolean matchesWith(BookAtomModelWrapper otherBook) {
+        if (this.isSeek()) {
+            return false;
+        }
+
+        if (!otherBook.isSeek()) {
+            return false;
+        }
+
+        String myIsbn = this.getSomeIsbn();
+        String otherIsbn = otherBook.getSomeIsbn();
+
+        if (myIsbn != null && otherIsbn != null) {
+            return myIsbn.equalsIgnoreCase(otherIsbn);
+        }
+
+        String myAuthor = this.getAnyAuthorName();
+        String otherAuthor = otherBook.getAuthorName();
+
+        if (myAuthor != null && otherAuthor != null && !myAuthor.equalsIgnoreCase(otherAuthor)) {
+            return false;
+        }
+
+        String myTitle = this.getSomeTitleFromIsOrAll();
+        String otherTitle = otherBook.getSomeTitleFromIsOrAll();
+
+        return myTitle.contains(otherTitle) || otherTitle.contains(myTitle);
     }
 }
