@@ -39,6 +39,24 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         super(atomModel, sysInfoModel);
     }
 
+    public void addBookOfferType(){
+        Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
+        atomNode.addProperty(RDF.type, ModelFactory.createDefaultModel().createProperty("https://w3id.org/won/ext/demo#BookOffer"));
+
+        Resource seeksnode = atomNode.getModel().createResource();
+        seeksnode.addProperty(RDF.type, ModelFactory.createDefaultModel().createProperty("https://w3id.org/won/ext/demo#BookSearch"));
+        atomNode.addProperty(WONMATCH.seeks, seeksnode);
+    }
+
+    public void addBookSearchType(){
+        Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
+        atomNode.addProperty(RDF.type, ModelFactory.createDefaultModel().createProperty("https://w3id.org/won/ext/demo#BookSearch"));
+
+        Resource seeksnode = atomNode.getModel().createResource();
+        seeksnode.addProperty(RDF.type, ModelFactory.createDefaultModel().createProperty("https://w3id.org/won/ext/demo#BookOffer"));
+        atomNode.addProperty(WONMATCH.seeks, seeksnode);
+    }
+
     public boolean isBookOffer() {
         return this.getContentTypes()
                 .stream()
@@ -478,5 +496,87 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
         String otherTitle = otherBook.getSomeTitleFromIsOrAll().toLowerCase();
 
         return myTitle.contains(otherTitle) || otherTitle.contains(myTitle);
+    }
+
+
+    private void createSeeksNodeIfNonExist() {
+        if (!this.isSeek()) {
+            this.createSeeksNode(null);
+        }
+    }
+
+    public void setIsbn(String isbn) {
+        Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
+        atomNode.addProperty(_SCHEMA.ISBN, isbn);
+    }
+
+    public void setUrl(String url) {
+        Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
+        atomNode.addProperty(_SCHEMA.URL, url);
+    }
+
+    public void setAuthorName(String name) {
+        Resource atomNode = this.getAtomNode(AtomGraphType.ATOM);
+        Resource author = atomNode.getModel().createResource();
+
+        atomNode.addProperty(SCHEMA.AUTHOR, author);
+        author.addProperty(SCHEMA.NAME, name);
+        author.addProperty(RDF.type, SCHEMA.PERSON);
+    }
+
+    public String getSeeksIsbn() {
+        for (Resource r : this.getSeeksNodes()) {
+            String c = this.getIsbn(r, _SCHEMA.ISBN);
+            if (c != null) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public String getIsbn() {
+        return this.getIsbn(this.getAtomContentNode(), _SCHEMA.ISBN);
+    }
+
+    private String getIsbn(Resource contentNode, Property isbnProperty) {
+        Model atomModel = this.getAtomModel();
+        RDFNode isbnNode = RdfUtils.findOnePropertyFromResource(atomModel, contentNode, isbnProperty);
+        if (isbnNode != null) {
+            return isbnNode.asLiteral().getString();
+        } else {
+            return null;
+        }
+    }
+
+    public Float getAnyPrice() {
+        if (this.isSeek()) {
+            return this.getSeeksPrice();
+        } else {
+            return this.getPrice();
+        }
+    }
+
+    public Float getSeeksPrice() {
+        for (Resource r : this.getSeeksNodes()) {
+            Float c = this.getPrice(r, SCHEMA.PRICE);
+            if (c != null) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public Float getPrice() {
+        return this.getPrice(this.getAtomContentNode(), SCHEMA.PRICE);
+    }
+
+    private Float getPrice(Resource contentNode, Property priceProperty) {
+        Model atomModel = this.getAtomModel();
+        RDFNode priceNode = RdfUtils.findOnePropertyFromResource(atomModel, contentNode, priceProperty);
+        if (priceNode != null) {
+            return Float.valueOf(priceNode.asLiteral().getString());
+        } else {
+            return null;
+        }
     }
 }
