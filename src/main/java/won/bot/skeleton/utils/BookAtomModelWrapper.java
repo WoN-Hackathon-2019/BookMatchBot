@@ -19,10 +19,7 @@ import won.protocol.vocabulary.WONMATCH;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Objects;
+import java.util.*;
 
 public class BookAtomModelWrapper extends AtomModelWrapper {
 
@@ -421,6 +418,37 @@ public class BookAtomModelWrapper extends AtomModelWrapper {
 
     public boolean isBook() {
         return this.isBookOffer() || this.isBookSearch();
+    }
+
+    public StorableBook toStorableBook() {
+        StorableBook result = new StorableBook();
+
+        result.setIsbn(this.getSomeIsbn());
+        result.setAuthor(this.getAnyAuthorName());
+        result.setTitle(this.getSomeTitleFromIsOrAll());
+
+        return result;
+    }
+
+    public boolean matchesWith(StorableBook other) {
+        String myIsbn = this.getSomeIsbn();
+        String otherIsbn = other.getIsbn();
+
+        if (myIsbn != null && otherIsbn != null) {
+            return myIsbn.equalsIgnoreCase(otherIsbn);
+        }
+
+        String myAuthor = this.getAnyAuthorName();
+        String otherAuthor = other.getAuthor();
+
+        if (myAuthor != null && otherAuthor != null && !myAuthor.equalsIgnoreCase(otherAuthor)) {
+            return false;
+        }
+
+        String myTitle = this.getSomeTitleFromIsOrAll().toLowerCase();
+        String otherTitle = other.getTitle().toLowerCase();
+
+        return myTitle.contains(otherTitle) || otherTitle.contains(myTitle);
     }
 
     public boolean matchesWith(BookAtomModelWrapper otherBook) {
